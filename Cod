@@ -1,0 +1,549 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+struct Account {
+    char name[100];
+    char password[100];
+    int balance;
+    int iban;
+};
+typedef struct Account Account;
+
+struct Node {
+    Account a;
+    struct Node* next;
+};
+
+struct Node* head = NULL;
+
+void show_accounts(struct Node* head) {
+    int id = 0;
+    struct Node* ptr = head;
+    while(ptr) {
+        id++;
+
+        printf("%d. %s, suma : %d , iban : %d\n", id, ptr->a.name, ptr->a.balance, ptr->a.iban);
+        ptr = ptr->next;
+    }
+}
+
+struct Node* newNode(Account new_data) {
+    struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
+    new_node->a.balance = new_data.balance;
+    new_node->a.iban = new_data.iban;
+    strcpy(new_node->a.name, new_data.name);
+    strcpy(new_node->a.password, new_data.password);
+    new_node->next = NULL;
+    return new_node;
+}
+
+void sortedInsert(struct Node** head_ref, struct Node* new_node) {
+    struct Node* current;
+    if (*head_ref == NULL || strcmp((*head_ref)->a.name, new_node->a.name) >= 0) {
+        new_node->next = *head_ref;
+        *head_ref = new_node;
+    }
+
+    else {
+        current = *head_ref;
+        while (current->next != NULL && strcmp(current->next->a.name, new_node->a.name) < 0) {
+            current = current->next;
+        }
+
+        new_node->next = current->next;
+        current->next = new_node;
+
+    }
+}
+
+
+
+void connect_menu() {
+    printf("                                                Bine ati venit in sistemul nostru bancar \n");
+    printf("--------------------------------------------------------------------------------------------------------------------------------\n");
+    printf("Te loghezi ca : \n");
+    printf("1. Manager\n");
+    printf("2. Client\n");
+    printf("3. Exit\n");
+}
+
+void write_accounts_file() {
+    FILE *f = fopen("accounts.txt", "w");
+    struct Node* ptr = head;
+    while(ptr) {
+        fprintf(f, "Nume :%s Parola : %s Balanta : %d Iban :%d\n", ptr->a.name, ptr->a.password, ptr->a.balance, ptr->a.iban);
+        ptr = ptr->next;
+    }
+    fclose(f);
+}
+
+int rnd(int lower, int upper) {
+    srand(time(0));
+    int num = (rand() % (upper - lower + 1)) + lower;
+    return num;
+}
+
+void add_account() {
+    Account a;
+    printf("Introdu username-ul contului: ");
+    scanf("%s", a.name);
+    printf("Introdu parola contului: ");
+    scanf("%s", a.password);
+    a.balance = 0;
+    a.iban = rnd(10000, 99999);
+    struct Node* new_node = newNode(a);
+    sortedInsert(&head, new_node);
+    write_accounts_file();
+}
+
+void search_record() {
+    printf("\nIntroduceti numele contului: ");
+    char nume[100];
+    scanf("%s", nume);
+    struct Node* ptr = head;
+    int flag = 0;
+    while(ptr) {
+        if(strcmp(ptr->a.name, nume) == 0) {
+            printf("%s %d %d\n", ptr->a.name, ptr->a.balance, ptr->a.iban);
+            flag = 1;
+            break;
+        }
+        ptr = ptr->next;
+    }
+    if(!flag) {
+        printf("Nu exista niciun cont cu acest nume\n");
+    }
+}
+void delete_account(){
+    printf("Doresti sa  stergi  un cont ?\n");
+    printf("1 -> Da\n");
+    printf("2 -> Nu\n");
+    int da;
+    scanf("%d", &da);
+    switch(da){
+     case 1 : {
+         printf("Atentie!.Aceasta operatie este ireversibila.\n");
+         printf("Continuati?\n");
+         printf("1 -> Da\n");
+         printf("2 -> Nu\n");
+         int nu ;
+         scanf("%d", &nu);
+         switch(nu){
+             case 1 : {
+             printf("Introduceti numele contului pe care vreti sa il stergeti: \n");
+    char nume[100];
+    scanf("%s", nume);
+    struct Node* ptr = head;
+    int flag = 0;
+    while(ptr) {
+        if(strcmp(ptr->a.name, nume) == 0) {
+            flag = 1;
+          strcpy(ptr->a.name , "\0");
+            break;
+        }
+        ptr = ptr->next;
+    }
+    if(!flag) {
+        printf("Nu exista niciun cont cu acest nume\n");
+    }else{
+             printf("Contul  a fost eliminat cu succes");
+             exit;
+             }
+             }
+             case 2 : {
+                 exit;
+             }
+         }
+
+
+    }
+    case 2 : {
+    exit;
+    }
+    }
+}
+void modify() {
+    printf("Ce doriti sa modificati la cont ?\n");
+    printf("1.Numele\n");
+    printf("2.Parola\n");
+    printf("3.Exit\n");
+
+    int hai_sa_vedem_ce_modificam ;
+    scanf("%d", &hai_sa_vedem_ce_modificam);
+    switch(hai_sa_vedem_ce_modificam){
+   int opt1, opt2;
+    char new_name[100], new_password[100];
+    case 1 : {
+    printf("Introduceti numele contului pe care vreti sa il modificati: ");
+    char nume[100];
+    scanf("%s", nume);
+    struct Node* ptr = head;
+    int flag = 0;
+    while(ptr) {
+        if(strcmp(ptr->a.name, nume) == 0) {
+            //printf("%s %d %d\n", ptr->a.name, ptr->a.balance, ptr->a.iban);
+            flag = 1;
+            break;
+        }
+        ptr = ptr->next;
+    }
+    if(!flag) {
+        printf("Nu exista niciun cont cu acest nume\n");
+    } else {
+        printf("Doriti sa modificati numele? ");
+        printf("\n1 -> Da");
+        printf("\n2 -> Nu\n");
+
+
+        scanf("%d", &opt1);
+
+        if(opt1 == 1) {
+            printf("Introduceti noul nume: ");
+            scanf("%s", new_name);
+        }
+    }
+    case 2 : {
+        printf("Doriti sa modificati parola ? \n");
+        printf("1 -> Da\n");
+        printf("2 -> Nu\n");
+        scanf("%d", &opt2);
+        if(opt2 == 1) {
+            printf("Introduceti noua parola: ");
+            scanf("%s", new_password);
+        }else{
+            exit;
+        }
+        ptr = head;
+        while(ptr) {
+            if(strcmp(ptr->a.name, nume) == 0) {
+                if(opt1 == 1) {
+                    strcpy(ptr->a.name, new_name);
+                }
+                if(opt2 == 1) {
+                    strcpy(ptr->a.password, new_password);
+                }
+                write_accounts_file();
+                break;
+            }
+            ptr = ptr->next;
+        }
+    }
+}
+    }
+}
+
+void manager() {
+    while(1) {
+        FILE *f = fopen("managers.txt", "r");
+        printf("Introdu username-ul managerului: ");
+        char *username = (char*)malloc(100 * sizeof(char));
+        scanf("%s", username);
+        printf("Introdu parola contului: ");
+        char *password = (char*)malloc(100 * sizeof(char));
+        scanf("%s", password);
+        int flag = 0;
+        char line[200];
+        while(fgets(line, sizeof(line), f)) {
+            int idx = strlen(line) - 1;
+            if(line[idx] == '\n') {
+                line[idx] = '\0';
+            }
+            char sep[] = " ";
+            char *token;
+            token = strtok(line, sep);
+            char *usr = (char*)malloc(100 * sizeof(char));
+            strcpy(usr, token);
+            token = strtok(NULL, sep);
+            char *pass = (char*)malloc(100 * sizeof(char));
+            strcpy(pass, token);
+            if(strcmp(username, usr) == 0 && strcmp(password, pass) == 0) {
+                flag = 1;
+                break;
+            }
+        }
+        fclose(f);
+        if(flag) {
+            printf("\n....Acces Permis....\n");
+            break;
+        } else {
+            printf("Date incorente.Te rog sa incerci din nou\n");
+        }
+    }
+    int flag = 0;
+    while(1) {
+        printf("\n1.Vezi toate conturile \n2.Cauta un cont \n3.Adauga un cont \n4.Modifica un cont existent \n5.Sterge un cont \n6.Exit\n");
+        printf("\nIntrodu numarul operatiei  :  ");
+        int opt;
+scanf("%d", &opt);
+        switch(opt) {
+            case 1: {
+                show_accounts(head);
+                break;
+            }
+            case 2: {
+                search_record();
+                break;
+            }
+            case 3: {
+                add_account();
+                break;
+            }
+            case 4: {
+                modify();
+                break;
+            }
+            case 5 : {
+            delete_account();
+            break;
+            }
+            case 6: {
+                printf("\n*****Multumim ca ati folosit Sistemul nostru bancar*****\n");
+flag = 1;
+                break;
+            }
+            default: {
+                printf("Optiune gresita. Introdu corect numarul operatiei!!!\n");
+            }
+        }
+        if(flag) {
+            break;
+        }
+    }
+}
+
+void read_accounts() {
+    FILE *f = fopen("accounts.txt", "r");
+    char line[300];
+    while(fgets(line, sizeof(line), f)) {
+        int idx = strlen(line) - 1;
+        if(line[idx] == '\n') {
+            line[idx] = '\0';
+        }
+        Account acc;
+        char sep[] = " ";
+        char *token;
+        token = strtok(line, sep);
+        strcpy(acc.name, token);
+        token = strtok(NULL, sep);
+        strcpy(acc.password, token);
+        token = strtok(NULL, sep);
+        acc.balance = atoi(token);
+        token = strtok(NULL, sep);
+        acc.iban = atoi(token);
+        struct Node* new_node = newNode(acc);
+        sortedInsert(&head, new_node);
+    }
+    fclose(f);
+}
+
+void deposit(char* username) {
+    int add;
+    printf("Introdu suma pe care doresti sa o adaugi : ");
+    scanf("%d", &add);
+    struct Node* ptr = head;
+    while(ptr) {
+        if(strcmp(ptr->a.name, username) == 0) {
+            ptr->a.balance += add;
+            write_accounts_file();
+            break;
+        }
+        ptr = ptr->next;
+    }
+}
+
+void check_info(char* username) {
+    struct Node* ptr = head;
+    while(ptr) {
+        if(strcmp(ptr->a.name, username) == 0) {
+            printf("\nNume : %s\n Balanta : %d\n Iban : %d\n", ptr->a.name, ptr->a.balance, ptr->a.iban);
+            break;
+        }
+        ptr = ptr->next;
+    }
+}
+
+void withdraw(char* username) {
+    int sum;
+    printf("Introdu suma pe care o doresti sa o retragi : ");
+    scanf("%d", &sum);
+    struct Node* ptr = head;
+    int flag = 0;
+    while(ptr) {
+        if(strcmp(ptr->a.name, username) == 0) {
+            if(ptr->a.balance >= sum) {
+                ptr->a.balance -= sum;
+                write_accounts_file();
+                flag = 1;
+                break;
+            }
+        }
+        ptr = ptr->next;
+    }
+    if(!flag) {
+        printf("Esti sarac!!!\n");
+    }
+}
+
+void transfer(char* username) {
+    printf("Introduceti numele: ");
+    char s[100];
+    scanf("%s", s);
+    printf("Introduceti iban-ul: ");
+    int iban;
+    scanf("%d", &iban);
+    struct Node* ptr = head;
+    int ok = 0;
+    while(ptr) {
+        if(strcmp(ptr->a.name, s) == 0 && ptr->a.iban == iban) {
+            ok = 1;
+            break;
+        }
+        ptr = ptr->next;
+    }
+    if(!ok) {
+        printf("Numele sau iban-ul introdus nu corespund niciunui client\n");
+    } else {
+        while(1) {
+            int sum;
+            printf("Introduceti suma pe care vreti sa o transferati: ");
+            scanf("%d", &sum);
+            struct Node* ptr = head;
+            int flag = 0;
+            while(ptr) {
+                if(strcmp(ptr->a.name, username) == 0) {
+                    if(ptr->a.balance < sum) {
+                        printf("Fonduri insuficiente:(\n");
+                    } else {
+                        flag = 1;
+                        ptr->a.balance -= sum;
+                        struct Node* p = head;
+                        while(p) {
+                            if(strcmp(p->a.name, s) == 0) {
+                                p->a.balance += sum;
+                            }
+                            p = p->next;
+                        }
+                        write_accounts_file();
+                    }
+                    break;
+                }
+                ptr = ptr->next;
+            }
+            if(flag) {
+                break;
+            }
+        }
+    }
+}
+
+
+void customer() {
+    char *username;
+    char *password;
+    while(1) {
+        FILE *f = fopen("accounts.txt", "r");
+        printf("Introdu username-ului contului : ");
+        username = (char*)malloc(100 * sizeof(char));
+        scanf("%s", username);
+        printf("Introdu parola contului : ");
+        password = (char*)malloc(100 * sizeof(char));
+        scanf("%s", password);
+        int flag = 0;
+        char line[200];
+        while(fgets(line, sizeof(line), f)) {
+            int idx = strlen(line) - 1;
+            if(line[idx] == '\n') {
+                line[idx] = '\0';
+            }
+            char sep[] = " ";
+            char *token;
+            token = strtok(line, sep);
+            char *usr = (char*)malloc(100 * sizeof(char));
+            strcpy(usr, token);
+            token = strtok(NULL, sep);
+            char *pass = (char*)malloc(100 * sizeof(char));
+            strcpy(pass, token);
+            if(strcmp(username, usr) == 0 && strcmp(password, pass) == 0) {
+                flag = 1;
+                break;
+            }
+        }
+        fclose(f);
+        if(flag) {
+            printf("\n....Acces Permis ....\n");
+            break;
+        } else {
+            printf("Date gresite. Te rog sa incerci din nou \n");
+        }
+    }
+
+    while(1) {
+        printf("\n\n1.Afisaza datele\n2.Depunere\n3.Retragere \n4.Transfera bani \n5.Exit\n");
+        printf("\Introdu numarul operatiei :  ");
+        int opt;
+scanf("%d", &opt);
+        int flag = 0;
+        switch(opt) {
+            case 1: {
+                check_info(username);
+                //show_accounts(head);
+                break;
+            }
+            case 2: {
+                deposit(username);
+                //search_record();
+                break;
+            }
+            case 3: {
+                withdraw(username);
+                break;
+            }
+            case 4: {
+                transfer(username);
+                break;
+            }
+            case 5: {
+                printf("\n*****Multumim ca ai folosit banca noastra*****");
+                flag = 1;
+                break;
+            }
+            default: {
+                printf("Optiune gresita. Alege optiunea corecta!!!\n");
+            }
+        }
+        if(flag) {
+            break;
+        }
+    }
+}
+
+int main() {
+    read_accounts();
+    while(1) {
+        connect_menu();
+        int opt;
+        printf("Introdu optiunea aleasa = ");
+        scanf("%d", &opt);
+        switch(opt) {
+            case 1: {
+                manager();
+                break;
+            }
+            case 2: {
+                customer();
+                break;
+            }
+            case 3: {
+                printf("*****Multumim ca ati folosit Sistemul nostru bancar*****\n");
+                printf("----------------------------------------------------------------------------------------------------------------------------------\n");
+                exit(1);
+            }
+            default: {
+                printf("Optiune gresita.Te rog sa alegi optiunea corecta!!!\n");
+            }
+        }
+    }
+    return 0;
+}
